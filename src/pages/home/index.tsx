@@ -20,6 +20,15 @@ const HomePage = () => {
     dayCheck: false,
     travelers: [],
     police: {},
+    calculatedPremium: undefined,
+    calculatedPremiumWithActi: undefined,
+    calculatedPremiumRUB: undefined,
+    calculatedPremiumRUBWithActi: undefined,
+    calculatedCurrency: undefined,
+    cover: undefined,
+    additionalRisks: [],
+    MULTIdays: [],
+    activeService: false
   });
   const cardSectionRef = useRef<HTMLDivElement>(null);
 
@@ -109,7 +118,10 @@ const HomePage = () => {
       />
       {calcData?.travelers?.length ? (
         <div ref={cardSectionRef}>
-          <Contract />
+          <Contract
+            calcData={calcData}
+            setCalcData={setCalcData}
+          />
         </div>
       ) : (
         ""
@@ -146,10 +158,12 @@ const HomePage = () => {
             onClick={onSubmit}
           >
             <div className="text-center text[18px] font-bold text-white leading-6 mb-[11px]">
-              {loading ? "Loading..." : <>{t("police")} (69,00 €)</>}
+              {loading ? "Loading..." : <>{t("police")} ({
+              calcData.activeService ? calcData.calculatedPremiumWithActi : calcData.calculatedPremium
+              }.00 €)</>}
             </div>
             <div className="text-center text-white text-[15px] font-semibold leading-6 ">
-              6 879,23 rub.
+              {calcData.activeService ? calcData.calculatedPremiumRUBWithActi : calcData.calculatedPremiumRUB} rub.
             </div>
           </button>
         </div>

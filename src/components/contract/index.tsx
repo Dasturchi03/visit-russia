@@ -5,10 +5,12 @@ import { FaChevronDown } from "react-icons/fa6";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
-const Contract = () => {
+const Contract = ({
+  calcData,
+  setCalcData
+}: any) => {
   const { t } = useTranslation();
   const [allTag, setAllTag] = useState(false);
-  const [activeService, setActiveService] = useState(false);
 
   const list = t("contract.listTag", { returnObjects: true }) as string[];
 
@@ -41,12 +43,13 @@ const Contract = () => {
         <div className="rounded-md py-[10px] px-2 border border-[#E5E3F9] text-[14px] font-normal text-[#8C8B9B] mb-[15px]">
           {t("contract.coverge")}{" "}
           <span className="text-[15px] font-semibold text-[#055087] ml-1.5">
-            35,000 €
+            {/* {premium.toFixed(2)} € */}
+            {calcData.cover} €
           </span>
         </div>
         <div className="flex flex-wrap gap-1.5 mb-[15px]">
-          {list?.slice(0, allTag ? list.length : 4)?.map((item: any) => (
-            <div className="w-max flex gap-0.5 items-center py-1.5 px-2.5 rounded-md bg-[#F3F6FB] text-[14px] font-normal text-black">
+          {list?.slice(0, allTag ? list.length : 4)?.map((item: any, index: number) => (
+            <div key={index} className="w-max flex gap-0.5 items-center py-1.5 px-2.5 rounded-md bg-[#F3F6FB] text-[14px] font-normal text-black">
               <span className="text-[055087] mr-0.5">
                 <FaCheck />
               </span>{" "}
@@ -77,7 +80,7 @@ const Contract = () => {
             {t("contract.police")}
           </p>
           <span className="text-[25px] font-semibold text-[69,00 €]">
-            {activeService ? `${69 + 35}.00` : "69.00"} €
+            {calcData.activeService ? `${calcData.calculatedPremiumWithActi}` : calcData.calculatedPremium}.00 €
           </span>
         </div>
         <div>
@@ -85,8 +88,13 @@ const Contract = () => {
             <input
               type="checkbox"
               id="checkedActive"
-              checked={activeService}
-              onChange={() => setActiveService(!activeService)}
+              checked={calcData.activeService}
+              onChange={() =>
+                setCalcData((prev: any) => ({
+                  ...prev,
+                  activeService: !prev.activeService,
+                }))
+              }
             />
             <label htmlFor="checkedActive">{t("contract.active")}</label>
             <div className="relative group w-fit">
@@ -99,8 +107,8 @@ const Contract = () => {
                   xmlns="http://www.w3.org/2000/svg"
                 >
                   <path
-                    fill-rule="evenodd"
-                    clip-rule="evenodd"
+                    fillRule="evenodd"
+                    clipRule="evenodd"
                     d="M16.2292 9.49998C16.2292 13.2164 13.2164 16.2291 9.5 16.2291C5.78359 16.2291 2.77084 13.2164 2.77084 9.49998C2.77084 5.78356 5.78359 2.77081 9.5 2.77081C13.2164 2.77081 16.2292 5.78356 16.2292 9.49998ZM17.4167 9.49998C17.4167 13.8722 13.8722 17.4166 9.5 17.4166C5.12775 17.4166 1.58334 13.8722 1.58334 9.49998C1.58334 5.12772 5.12775 1.58331 9.5 1.58331C13.8722 1.58331 17.4167 5.12772 17.4167 9.49998ZM10.0523 10.7493H8.94401L8.76668 8.39323V5.69994H10.2297V8.39323L10.0523 10.7493ZM10.2297 13.4583H8.76668V11.9288H10.2297V13.4583Z"
                     fill="#055087"
                   />

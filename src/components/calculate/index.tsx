@@ -6,6 +6,8 @@ import CustomButton from "../../ui/button";
 import { IoCloseCircle, IoChevronDown } from "react-icons/io5";
 import DaySelect from "../../ui/day-select";
 import { useTranslation } from "react-i18next";
+import { fetchDictionaries,  calculatePolicy} from "../../api/insuranceApi";
+
 
 const Calculate = ({
   calcData,
@@ -74,22 +76,112 @@ const Calculate = ({
     return isValid;
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!validateForm()) return;
 
-    setCalcData((prev: any) => ({
+    try {
+      const dictionaries = await fetchDictionaries();
+      console.log(dictionaries[0]?.guid);
+      console.log(dictionaries[0]?.programs?.[0]?.guid);
+      console.log(dictionaries[0]?.territories?.[0]?.guid);
+      console.log(dictionaries[0]?.programs?.[0]?.cover);
+      console.log(dictionaries[0]?.programs?.[0]?.additional_risks);
+      console.log(dictionaries[0]?.programs?.[0]?.MULTI_days);
+      const insurance_company = dictionaries[0]?.guid;
+      const program = dictionaries[0]?.programs?.[0]?.guid;
+      const territory = dictionaries[0]?.territories?.[0]?.guid;
+      const cover = dictionaries[0]?.programs?.[0]?.cover
+      const additionalRisks = dictionaries[0]?.programs?.[0]?.additional_risks
+      const MULTIdays = dictionaries[0]?.programs?.[0]?.MULTI_days
+      if (!insurance_company || !program || !territory) {
+        throw new Error("Dictionaries’dan GUID’lar topilmadi.");
+      }
+
+      const insured = tourists.map((t: any) => {
+        const year = new Date().getFullYear() - t.age;
+        const birthday = new Date(`${year}-01-01T00:00:00`).toISOString();
+        return {
+          first_name: t.firstname || "Ivan",
+          last_name: t.lastname || "Ivanov",
+          birthday
+        };
+      });
+
+      const buyer = {
+        first_name: "Petr",
+        last_name: "Petrov",
+        email: "123456@gmail.com",
+        TIN: ""
+      };
+
+      const payload = {
+        pay_in_russia: true,
+        insurance_company,
+        program,
+        territory,
+        start: startDate?.toISOString(),
+        end: endDate?.toISOString(),
+        multi_days: checkbox ? selectedDays : 0,
+        place_of_purchase: "Somewhere",
+        order_number: Date.now().toString(),
+        ...buyer,
+        Insured: insured,
+        additional_risks: checkbox ? additionalRisks : []
+      };
+      const payloadWithoutActivation = {
+        pay_in_russia: true,
+        insurance_company,
+        program,
+        territory,
+        start: startDate?.toISOString(),
+        end: endDate?.toISOString(),
+        multi_days: checkbox ? selectedDays : 0,
+        place_of_purchase: "Somewhere",
+        order_number: Date.now().toString(),
+        ...buyer,
+        Insured: insured,
+        additional_risks: []
+      }
+      const result = await calculatePolicy(payloadWithoutActivation);
+      const resultWithActivation = await calculatePolicy(payload);
+
+      // setCalcData({
+      //   startDate,
+      //   endDate,
+      //   premium: result.premium,
+      //   premiumRUR: result.premiumRUR,
+      //   travelers: tourists,
+      //   police: buyer
+      // });
+      console.log("result", result)
+      console.log("resultWithActive", resultWithActivation)
+      setCalcData((prev: any) => ({
       ...prev,
       startDate,
       endDate,
       dayCheck: checkbox,
-      travelers: tourists,
+      travelers: insured,
       police: {
         lastname: "",
         firstname: "",
         email: [{ value: "" }],
         birthOfDate: undefined,
       },
+      calculatedPremium: result.premium,
+      calculatedPremiumWithActi: resultWithActivation.premium,
+      calculatedPremiumRUB: result.premiumRUR,
+      calculatedPremiumRUBWithActi: resultWithActivation.premiumRUR,
+      calculatedCurrency: result.currency,
+      cover: cover,
+      additionalRisks: additionalRisks,
+      MULTIdays: MULTIdays
     }));
+
+    }
+    catch (err: any) {
+      console.error("Kalkulyatsiya xatosi:", err);
+      alert("API orqali narxni olishda xatolik yuz berdi");
+    };
     setVisableCard(true);
   };
 
@@ -106,7 +198,7 @@ const Calculate = ({
     } else {
       setSelectedDays(0);
     }
-  }, [startDate, endDate, checkbox]);
+  }, [startDate, checkbox]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {

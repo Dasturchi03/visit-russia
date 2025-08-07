@@ -164,60 +164,61 @@ const PoliceCard = ({ item, setCalcData, error }: any) => {
 
       {/* Email fields */}
       <div className="w-full mb-3">
-        <label className="mb-1 text-[14px] font-medium leading-[140%]">
-          {t("traveler.email")}
-        </label>
-        {(item?.email || [{ value: "" }]).map(
-          (emailObj: { value: string }, i: number) => {
-            const isInvalid = emailObj.value && !isValidEmail(emailObj.value);
-            return (
-              <div key={i} className="mb-[15px]">
-                <div className="flex items-center gap-2">
-                  <input
-                    name="email"
-                    value={emailObj.value}
-                    onChange={(e) => onChangeInput(e, i)}
-                    type="email"
-                    className={`py-2 px-2.5 w-full outline-0 rounded-lg bg-[#F3F6FB]
-    border ${
-      isInvalid || (error && !emailObj.value)
-        ? "border-red-500"
-        : "border-transparent"
-    }`}
-                  />
+      <label className="mb-1 text-[14px] font-medium leading-[140%]">
+        {t("traveler.email")}
+      </label>
 
-                  {item.email?.length > 1 && (
-                    <button
-                      type="button"
-                      onClick={() => removeEmailField(i)}
-                      className="text-red-500 hover:text-red-700"
-                    >
-                      <IoCloseSharp />
-                    </button>
-                  )}
-                </div>
+      {(Array.isArray(item?.email) ? item.email : [{ value: "" }]).map(
+        (emailObj: { value: string }, i: number) => {
+          const isInvalid = emailObj.value && !isValidEmail(emailObj.value);
+          return (
+            <div key={i} className="mb-[15px]">
+              <div className="flex items-center gap-2">
+                <input
+                  name="email"
+                  value={emailObj.value}
+                  onChange={(e) => onChangeInput(e, i)}
+                  type="email"
+                  className={`py-2 px-2.5 w-full outline-0 rounded-lg bg-[#F3F6FB]
+                  border ${
+                    isInvalid || (error && !emailObj.value)
+                      ? "border-red-500"
+                      : "border-transparent"
+                  }`}
+                />
+                {(item?.email?.length || 0) > 1 && (
+                  <button
+                    type="button"
+                    onClick={() => removeEmailField(i)}
+                    className="text-red-500 hover:text-red-700"
+                  >
+                    <IoCloseSharp />
+                  </button>
+                )}
               </div>
-            );
-          }
-        )}
+            </div>
+          );
+        }
+      )}
 
-        <CustomButton
-          py={"py-[5px]"}
-          size={"text-[13px]"}
-          width={"w-max"}
-          text={
-            <p className="flex items-center gap-2">
-              {t("traveler.buttonEmail")}
-              <span>
-                <BiPlus />
-              </span>
-            </p>
-          }
-          onClick={addEmailField}
-          className="text-blue-600 text-sm underline mt-1"
-        />
-      </div>
+      <CustomButton
+        py={"py-[5px]"}
+        size={"text-[13px]"}
+        width={"w-max"}
+        text={
+          <p className="flex items-center gap-2">
+            {t("traveler.buttonEmail")}
+            <span>
+              <BiPlus />
+            </span>
+          </p>
+        }
+        onClick={addEmailField}
+        className="text-blue-600 text-sm underline mt-1"
+      />
     </div>
+
+  </div>
   );
 };
 
