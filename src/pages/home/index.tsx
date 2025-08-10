@@ -6,30 +6,16 @@ import CustomButton from "../../ui/button";
 import PoliceCard from "../../components/police-card";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
+import { postPolicy } from "../../api/insuranceApi";
+import { useCalcContext } from "../../context/apiContext";
 
 const HomePage = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [visableCard, setVisableCard] = useState(false);
-  const [tourists, setTourists] = useState<any>([]);
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(false)
-  const [calcData, setCalcData] = useState({
-    startDate: undefined,
-    endDate: undefined,
-    dayCheck: false,
-    travelers: [],
-    police: {},
-    calculatedPremium: undefined,
-    calculatedPremiumWithActi: undefined,
-    calculatedPremiumRUB: undefined,
-    calculatedPremiumRUBWithActi: undefined,
-    calculatedCurrency: undefined,
-    cover: undefined,
-    additionalRisks: [],
-    MULTIdays: [],
-    activeService: false
-  });
+  const {calcData, setCalcData, tourists, setTourists} = useCalcContext();
   const cardSectionRef = useRef<HTMLDivElement>(null);
 
   const removeTraveler = (index: number) => {
@@ -89,8 +75,10 @@ const HomePage = () => {
     return isValid;
   };
 
-  const onSubmit = () => {
-    
+  const onSubmit = async () => {
+    const data = await postPolicy(calcData.activeService ? calcData.calculatePayloadWithService : calcData.calculatePayload)
+    console.log(data)
+
     setLoading(true)
     const isValid = validateCalcData(calcData, setError);
     setLoading(false)
@@ -110,18 +98,13 @@ const HomePage = () => {
   return (
     <div className="relative z-20 top-[88px] flex flex-col gap-y-10">
       <Calculate
-        calcData={calcData}
-        setCalcData={setCalcData}
         tourists={tourists}
         setTourists={setTourists}
         setVisableCard={setVisableCard}
       />
       {calcData?.travelers?.length ? (
         <div ref={cardSectionRef}>
-          <Contract
-            calcData={calcData}
-            setCalcData={setCalcData}
-          />
+          <Contract/>
         </div>
       ) : (
         ""
@@ -130,12 +113,11 @@ const HomePage = () => {
         <div className="flex flex-col p-5 gap-y-[15px]">
           {calcData?.travelers?.map((item: any, index: number) => (
             <TourCard
-              setCalcData={setCalcData}
               error={error}
               key={item?.id}
               item={item}
               index={index}
-              onRemove={calcData.travelers.length > 1 ? removeTraveler : null}
+              onRemove={(calcData.travelers?.length ?? 0) > 1 ? removeTraveler : null}
             />
           ))}
           <CustomButton onClick={addATraveler} text={t("traveler.button")} />
@@ -145,7 +127,7 @@ const HomePage = () => {
       )}
       {visableCard ? (
         <div className="px-5">
-          <PoliceCard error={error} item={calcData?.police} setCalcData={setCalcData} />
+          <PoliceCard error={error} item={calcData?.police} />
         </div>
       ) : (
         ""
@@ -160,7 +142,7 @@ const HomePage = () => {
             <div className="text-center text[18px] font-bold text-white leading-6 mb-[11px]">
               {loading ? "Loading..." : <>{t("police")} ({
               calcData.activeService ? calcData.calculatedPremiumWithActi : calcData.calculatedPremium
-              }.00 €)</>}
+              } €)</>}
             </div>
             <div className="text-center text-white text-[15px] font-semibold leading-6 ">
               {calcData.activeService ? calcData.calculatedPremiumRUBWithActi : calcData.calculatedPremiumRUB} rub.

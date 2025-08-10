@@ -7,16 +7,13 @@ import { IoCloseCircle, IoChevronDown } from "react-icons/io5";
 import DaySelect from "../../ui/day-select";
 import { useTranslation } from "react-i18next";
 import { fetchDictionaries,  calculatePolicy} from "../../api/insuranceApi";
-
+import { useCalcContext } from "../../context/apiContext";
 
 const Calculate = ({
-  calcData,
-  setCalcData,
-  setTourists,
-  tourists,
-  setVisableCard,
+  setVisableCard
 }: any) => {
   const { t } = useTranslation();
+  const {calcData, setCalcData, tourists, setTourists} = useCalcContext();
   const [startDate, setStartDate] = useState<Date | undefined>(undefined);
   const [endDate, setEndDate] = useState<Date | undefined>(undefined);
   const [selectedDays, setSelectedDays] = useState<number>(365);
@@ -36,16 +33,23 @@ const Calculate = ({
   const ageDropdownRef = useRef<HTMLDivElement>(null);
   const ageOptions = Array.from({ length: 101 }, (_, i) => i);
 
+  const getBirthDateFromAge = (age: number) => {
+    const year = new Date().getFullYear() - age;
+    return new Date(`${year}-01-01T00:00:00`)
+  };
+
   const removeTourist = (id: number) => {
     setTourists((prev: any) => prev.filter((t: any) => t.id !== id));
   };
 
   const addTourist = (age: number) => {
-    setSelectedAge(age); // ✅ tanlangan yoshni saqlash
+    const birthOfDate = getBirthDateFromAge(age);
+
     setTourists((prev: any) => [
       ...prev,
-      { id: Date.now(), age, firstname: "", lastname: "", isBuy: false },
+      { id: Date.now(), age, firstname: "", lastname: "", isBuy: false, birthOfDate }
     ]);
+
     setShowAgeDropdown(false);
   };
 
@@ -81,12 +85,6 @@ const Calculate = ({
 
     try {
       const dictionaries = await fetchDictionaries();
-      console.log(dictionaries[0]?.guid);
-      console.log(dictionaries[0]?.programs?.[0]?.guid);
-      console.log(dictionaries[0]?.territories?.[0]?.guid);
-      console.log(dictionaries[0]?.programs?.[0]?.cover);
-      console.log(dictionaries[0]?.programs?.[0]?.additional_risks);
-      console.log(dictionaries[0]?.programs?.[0]?.MULTI_days);
       const insurance_company = dictionaries[0]?.guid;
       const program = dictionaries[0]?.programs?.[0]?.guid;
       const territory = dictionaries[0]?.territories?.[0]?.guid;
@@ -104,6 +102,16 @@ const Calculate = ({
           first_name: t.firstname || "Ivan",
           last_name: t.lastname || "Ivanov",
           birthday
+        };
+      });
+
+      const travelers = tourists.map((t: any) => {
+        const year = new Date().getFullYear() - t.age;
+        const birthOfDate = new Date(`${year}-01-01T00:00:00`);
+        return {
+          first_name: t.firstname || "Ivan",
+          last_name: t.lastname || "Ivanov",
+          birthOfDate
         };
       });
 
@@ -126,20 +134,10 @@ const Calculate = ({
         order_number: Date.now().toString(),
         ...buyer,
         Insured: insured,
-        additional_risks: checkbox ? additionalRisks : []
+        additional_risks: additionalRisks
       };
       const payloadWithoutActivation = {
-        pay_in_russia: true,
-        insurance_company,
-        program,
-        territory,
-        start: startDate?.toISOString(),
-        end: endDate?.toISOString(),
-        multi_days: checkbox ? selectedDays : 0,
-        place_of_purchase: "Somewhere",
-        order_number: Date.now().toString(),
-        ...buyer,
-        Insured: insured,
+        ...payload,
         additional_risks: []
       }
       const result = await calculatePolicy(payloadWithoutActivation);
@@ -153,14 +151,13 @@ const Calculate = ({
       //   travelers: tourists,
       //   police: buyer
       // });
-      console.log("result", result)
-      console.log("resultWithActive", resultWithActivation)
+
       setCalcData((prev: any) => ({
       ...prev,
       startDate,
       endDate,
       dayCheck: checkbox,
-      travelers: insured,
+      travelers: travelers,
       police: {
         lastname: "",
         firstname: "",
@@ -174,13 +171,14 @@ const Calculate = ({
       calculatedCurrency: result.currency,
       cover: cover,
       additionalRisks: additionalRisks,
-      MULTIdays: MULTIdays
+      MULTIdays: MULTIdays,
+      caclulatePayload: payloadWithoutActivation,
+      calculatePayloadWithService: payload
     }));
 
     }
     catch (err: any) {
-      console.error("Kalkulyatsiya xatosi:", err);
-      alert("API orqali narxni olishda xatolik yuz berdi");
+      console.error("Ошибка расчета:", err);
     };
     setVisableCard(true);
   };

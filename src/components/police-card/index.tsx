@@ -4,9 +4,11 @@ import { IoCloseSharp } from "react-icons/io5";
 import CustomButton from "../../ui/button";
 import { BiPlus } from "react-icons/bi";
 import { useTranslation } from "react-i18next";
+import { useCalcContext } from "../../context/apiContext";
 
-const PoliceCard = ({ item, setCalcData, error }: any) => {
+const PoliceCard = ({ item, error }: any) => {
   const { t } = useTranslation();
+  const {setCalcData} = useCalcContext();
 
   const onChangeInput = (
     e: React.ChangeEvent<HTMLInputElement>,

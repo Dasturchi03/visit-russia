@@ -3,10 +3,13 @@ import logoBlack from "../../assets/logo-black.png";
 import CustomButton from "../../ui/button";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { useCalcContext } from "../../context/apiContext";
 
 const PaymantPage = () => {
   const navigate = useNavigate();
   const { t } = useTranslation();
+
+  const {calcData} = useCalcContext();
 
   const [cardInfo, setCardInfo] = useState({
     number: "",
@@ -84,7 +87,11 @@ const PaymantPage = () => {
           </div>
           <div className="flex flex-col gap-y-2 items-end">
             <p className="text-[14px] font-normal text-[#191919]">ART12006 30.07.2025</p>
-            <p className="text-[#055087] font-semibold text-[16px]">6 879,23 ₽</p>
+            <p className="text-[#055087] font-semibold text-[16px]">{
+                calcData.activeService ?
+                calcData.calculatedPremiumRUBWithActi :
+                calcData.calculatedPremiumRUB
+            } ₽</p>
           </div>
         </div>
 

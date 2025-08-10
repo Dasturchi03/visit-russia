@@ -2,9 +2,11 @@ import DatePicker from "react-datepicker";
 import CustomInput from "../../ui/custom-input";
 import { IoCloseSharp } from "react-icons/io5";
 import { useTranslation } from "react-i18next";
+import { useCalcContext } from "../../context/apiContext";
 
-const TourCard = ({ item, index, setCalcData, onRemove, error }: any) => {
+const TourCard = ({ item, index, onRemove, error }: any) => {
   const { t } = useTranslation();
+  const {setCalcData} = useCalcContext();
   const onChangeInput = (e: any) => {
     const { name, value } = e.target;
 
@@ -131,7 +133,15 @@ const TourCard = ({ item, index, setCalcData, onRemove, error }: any) => {
           {t("traveler.birthOfDate")}
         </label>
         <DatePicker
-          selected={item.birthOfDate || null}
+          selected={
+            item.birthOfDate
+            ? item.birthOfDate
+            : item.age
+            ? new Date(
+                new Date().setFullYear(new Date().getFullYear() - item.age)
+              )
+            : null
+          }
           onChange={onChangebirthOfDate}
           placeholderText={t("date")}
           dateFormat="dd.MM.yyyy"

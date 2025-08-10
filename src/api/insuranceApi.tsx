@@ -18,9 +18,19 @@ export const fetchDictionaries = async () => {
 export const calculatePolicy = async (payload: any) => {
   const response = await axios.post(`${BASE_URL}/calculate/`, payload, {
     headers: {
-      Authorization: authHeader,
-      'Content-Type': 'application/json',
+        Authorization: authHeader,
+        'Content-Type': 'application/json',
     },
   });
   return response.data;
 };
+
+export const postPolicy = async (payload: any) => {
+  const response = await axios.post(`${BASE_URL}/issue/`, payload, {
+      headers: {
+          Authorization: authHeader,
+          'Content-Type': 'application/json'
+      }
+  });
+  return response.data;
+}
