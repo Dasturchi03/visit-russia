@@ -123,7 +123,7 @@ const Calculate = ({
       };
 
       const payload = {
-        pay_in_russia: true,
+        pay_in_russia: false,
         insurance_company,
         program,
         territory,
