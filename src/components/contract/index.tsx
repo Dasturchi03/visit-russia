@@ -4,13 +4,12 @@ import CustomButton from "../../ui/button";
 import { FaChevronDown } from "react-icons/fa6";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useCalcContext } from "../../context/apiContext";
 
-const Contract = ({
-  calcData,
-  setCalcData
-}: any) => {
+const Contract = ({}: any) => {
   const { t } = useTranslation();
   const [allTag, setAllTag] = useState(false);
+  const {calcData, setCalcData} = useCalcContext();
 
   const list = t("contract.listTag", { returnObjects: true }) as string[];
 
@@ -80,7 +79,7 @@ const Contract = ({
             {t("contract.police")}
           </p>
           <span className="text-[25px] font-semibold text-[69,00 €]">
-            {calcData.activeService ? `${calcData.calculatedPremiumWithActi}` : calcData.calculatedPremium}.00 €
+            {calcData.activeService ? `${calcData.calculatedPremiumWithActi}` : calcData.calculatedPremium} €
           </span>
         </div>
         <div>
