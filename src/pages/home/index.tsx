@@ -76,13 +76,12 @@ const HomePage = () => {
   };
 
   const onSubmit = async () => {
-    const data = await postPolicy(calcData.activeService ? calcData.calculatePayloadWithService : calcData.calculatePayload)
-    console.log(data)
-
+    
     setLoading(true)
     const isValid = validateCalcData(calcData, setError);
     setLoading(false)
     if (!isValid) return;
+    const data = await postPolicy(calcData.activeService ? calcData.calculatePayloadWithService : calcData.calculatePayload)
 
     setLoading(false)
     navigate("/payment");

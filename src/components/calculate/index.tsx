@@ -172,7 +172,7 @@ const Calculate = ({
       cover: cover,
       additionalRisks: additionalRisks,
       MULTIdays: MULTIdays,
-      caclulatePayload: payloadWithoutActivation,
+      calculatePayload: payloadWithoutActivation,
       calculatePayloadWithService: payload
     }));
 
